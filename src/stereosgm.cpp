@@ -82,7 +82,7 @@ void stereosgm::visualizer(cv::Mat &cloud){
   //std::cout<<points.size ()<<std::endl;
   basic_cloud_ptr->width = (int) basic_cloud_ptr->points.size ();
   basic_cloud_ptr->height = 1;
-  basic_cloud_ptr->header.frame_id = "camera_link";
+  basic_cloud_ptr->header.frame_id = "map";
   // basic_cloud_ptr->
 
   // boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;

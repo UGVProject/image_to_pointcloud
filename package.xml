@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package>
-  <name>convert_pcl</name>
+  <name>image_to_pointcloud</name>
   <version>0.0.0</version>
   <description>The pointgrey publisher package</description>
   <author>Chris</author>

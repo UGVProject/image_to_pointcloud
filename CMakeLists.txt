@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(convert_pcl)
+project(image_to_pointcloud)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
@@ -50,7 +50,7 @@ add_definitions(${PCL_DEFINITIONS})
 
 CUDA_ADD_EXECUTABLE(image_to_pcl_node ${SRC_LIST} ${CUDA_SRC})
 # ADD_EXECUTABLE(image_to_pcl_node ${SRC_LIST} ${CUDA_SRC})
-add_library(convert_pcl ${SRC_LIST} )
+add_library(image_to_pointcloud ${SRC_LIST} )
 
 TARGET_LINK_LIBRARIES(image_to_pcl_node ${PROJECT_SOURCE_DIR}/lib/libsgm.a ${CUDA_LIBRARIES} ${catkin_LIBRARIES} ${CUDA_nppi_LIBRARY} ${OpenCV_LIBS} ${PCL_LIBRARIES})
 
