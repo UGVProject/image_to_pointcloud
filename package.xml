@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <package>
-  <name>convert_pcl</name>
+  <name>Stereo_VO</name>
   <version>0.0.0</version>
-  <description>The pointgrey publisher package</description>
-  <author>Chris</author>
-  <maintainer email="hzhang032@e.ntu.edu.sg">Chris</maintainer>
+  <description>The UGV slam package</description>
+  <author>Zhang Handuo</author>
+  <maintainer email="hzhang032@e.ntu.edu.sg">Zhang Handuo</maintainer>
   <license>BSD</license>
 
   <buildtool_depend>catkin</buildtool_depend>

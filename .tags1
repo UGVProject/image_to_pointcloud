@@ -1,0 +1,16 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	0	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+ImageGrabber	/home/zh/catkin_ws/src/stereo_slam_imu/src/stereo_vo_node.cpp	/^class ImageGrabber {$/;"	class	line:19	file:
+ImageGrabber	/home/zh/catkin_ws/src/stereo_slam_imu/src/stereo_vo_node.cpp	/^  ImageGrabber(Stereo_VO::System *pSLAM) : mpSLAM(pSLAM) {}$/;"	function	line:21	class:ImageGrabber	signature:(Stereo_VO::System *pSLAM)
+mpSLAM	/home/zh/catkin_ws/src/stereo_slam_imu/src/stereo_vo_node.cpp	/^  Stereo_VO::System *mpSLAM;$/;"	member	line:25	class:ImageGrabber	file:
+do_rectify	/home/zh/catkin_ws/src/stereo_slam_imu/src/stereo_vo_node.cpp	/^  bool do_rectify;$/;"	member	line:26	class:ImageGrabber	file:
+M1l	/home/zh/catkin_ws/src/stereo_slam_imu/src/stereo_vo_node.cpp	/^  cv::Mat M1l, M2l, M1r, M2r;$/;"	member	line:27	class:ImageGrabber	file:
+M2l	/home/zh/catkin_ws/src/stereo_slam_imu/src/stereo_vo_node.cpp	/^  cv::Mat M1l, M2l, M1r, M2r;$/;"	member	line:27	class:ImageGrabber	file:
+M1r	/home/zh/catkin_ws/src/stereo_slam_imu/src/stereo_vo_node.cpp	/^  cv::Mat M1l, M2l, M1r, M2r;$/;"	member	line:27	class:ImageGrabber	file:
+M2r	/home/zh/catkin_ws/src/stereo_slam_imu/src/stereo_vo_node.cpp	/^  cv::Mat M1l, M2l, M1r, M2r;$/;"	member	line:27	class:ImageGrabber	file:
+main	/home/zh/catkin_ws/src/stereo_slam_imu/src/stereo_vo_node.cpp	/^int main(int argc, char **argv) {$/;"	function	line:30	signature:(int argc, char **argv)
+GrabImage	/home/zh/catkin_ws/src/stereo_slam_imu/src/stereo_vo_node.cpp	/^void ImageGrabber::GrabImage(const sensor_msgs::ImageConstPtr &msg) {$/;"	function	line:106	class:ImageGrabber	signature:(const sensor_msgs::ImageConstPtr &msg)
