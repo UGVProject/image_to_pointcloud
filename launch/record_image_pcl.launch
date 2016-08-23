@@ -1,4 +1,7 @@
 <launch>
+  <arg name="dataset" value="4mm_Campus_17:06_loop"/>
+  <node pkg="rosbag" type="play" name="play_bag_node" args="--queue=10 --clock $(find $HOME)/$(arg dataset).bag" output="screen"/>
+
   <node name="image_to_pcl_node" pkg="convert_pcl" type="image_to_pcl_node" output="screen">
 
     <param name="scale"                 value="2" />
@@ -6,4 +9,5 @@
     <param name="extrinsic_filename"    value="$(find convert_pcl)/extrinsics.yml" />
     <param name="disparity_size"        value="128" />
   </node>
+
 </launch>

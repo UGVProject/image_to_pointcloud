@@ -27,14 +27,14 @@ void stereosgm::StereoMatching(const cv::Mat &imLeft, const cv::Mat &imRight, cv
   sgm::StereoSGM ssgm(imLeft.cols, imLeft.rows, disp_size, bits, 8, sgm::EXECUTE_INOUT_HOST2HOST);
 	cv::Mat output(cv::Size(imLeft.cols, imLeft.rows), CV_8UC1);
 
-	gettimeofday(&start, NULL);
+	// gettimeofday(&start, NULL);
 	ssgm.execute(left.data, right.data, (void**)&output.data);
-	gettimeofday(&end, NULL);
+	// gettimeofday(&end, NULL);
 
-	seconds  = end.tv_sec  - start.tv_sec;
-  useconds = end.tv_usec - start.tv_usec;
-  mtime = ((seconds) * 1000 + useconds/1000.0) + 0.5;
-  std::cout << "Elapsed time: " << mtime << "milliseconds!"  << std::endl;
+	// seconds  = end.tv_sec  - start.tv_sec;
+  // useconds = end.tv_usec - start.tv_usec;
+  // mtime = ((seconds) * 1000 + useconds/1000.0) + 0.5;
+  // std::cout << "Elapsed time: " << mtime << "milliseconds!"  << std::endl;
 
   // cvtColor(left, left_color, CV_GRAY2RGB);
   //3D point cloud caluculation
@@ -82,7 +82,7 @@ void stereosgm::visualizer(cv::Mat &cloud){
   //std::cout<<points.size ()<<std::endl;
   basic_cloud_ptr->width = (int) basic_cloud_ptr->points.size ();
   basic_cloud_ptr->height = 1;
-  // basic_cloud_ptr->header.frame_id = "camera";
+  basic_cloud_ptr->header.frame_id = "camera_link";
   // basic_cloud_ptr->
 
   // boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;

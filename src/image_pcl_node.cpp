@@ -39,11 +39,11 @@ int main(int argc, char **argv) {
 
   ImageGrabber igb(&SGM_Matching);
   igb.scale = 2;
-  igb.disp_size = 128;
+  igb.disp_size = 64;
   cv::Size fsize(640, 300);
   std::string intrinsic_filename, extrinsic_filename;
-  intrinsic_filename = "/home/ugv/catkin_ws/src/image_to_pcl/intrinsics.yml";
-  extrinsic_filename = "/home/ugv/catkin_ws/src/image_to_pcl/extrinsics.yml";
+  intrinsic_filename = "/home/zh/catkin_ws/src/image_to_pointcloud/intrinsics.yml";
+  extrinsic_filename = "/home/zh/catkin_ws/src/image_to_pointcloud/extrinsics.yml";
 
   if(n.getParam("scale", igb.scale))
     ROS_INFO("Get scale: %d", igb.scale );
@@ -122,9 +122,9 @@ int main(int argc, char **argv) {
   while (nh.ok())
   {
     if(SGM_Matching.basic_cloud_ptr != NULL){
-      // SGM_Matching.basic_cloud_ptr->header.stamp = ros::Time::now().toNSec();
-      SGM_Matching.basic_cloud_ptr->header.stamp = igb.head.stamp.toNSec()/1000ull;
-      SGM_Matching.basic_cloud_ptr->header.frame_id = "map";
+      SGM_Matching.basic_cloud_ptr->header.stamp = ros::Time::now().toNSec()/1000ull;
+      // SGM_Matching.basic_cloud_ptr->header.stamp = igb.head.stamp.toNSec()/1000ull;
+      // SGM_Matching.basic_cloud_ptr->header.frame_id = "map";
       // pcl_conversions::toPCL(igb.head, SGM_Matching.basic_cloud_ptr->header);
       // pcl_conversions::toPCL(ros::Time::now(), SGM_Matching.basic_cloud_ptr->header.stamp);
       point_pub.publish(SGM_Matching.basic_cloud_ptr);
