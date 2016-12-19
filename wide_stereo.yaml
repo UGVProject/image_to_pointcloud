@@ -1,0 +1,75 @@
+%YAML:1.0
+
+#--------------------------------------------------------------------------------------------
+# Camera Parameters. Adjust them!
+#--------------------------------------------------------------------------------------------
+
+# Camera calibration and distortion parameters (OpenCV)
+Camera.fx: 430.5   # 860.15
+Camera.fy: 428.6   # 856.09
+Camera.cx: 312.824
+Camera.cy: 150.5
+# 440.983
+
+Camera.k1: -0.2172
+Camera.k2: 0.0962
+Camera.p1: 0
+Camera.p2: 0
+Camera.k3: -0.0246
+
+Camera.width: 640
+Camera.height: 282
+
+
+# Camera frames per second
+Camera.fps: 12.0
+
+# stereo baseline times fx
+Camera.bf: 128.582   # 298.68
+
+# Color order of the images (0: BGR, 1: RGB. It is ignored if images are grayscale)
+Camera.RGB: 1
+
+# Close/Far threshold. Baseline times.
+ThDepth: 43
+
+#--------------------------------------------------------------------------------------------
+# Stereo Rectification. Only if you need to pre-rectify the images.
+# Camera.fx, .fy, etc must be the same as in LEFT.P
+#--------------------------------------------------------------------------------------------
+LEFT.height: 282
+LEFT.width: 640
+LEFT.D: !!opencv-matrix
+   rows: 1
+   cols: 5
+   dt: d
+   data: [-0.21715, 0.0962, 0., 0., -0.0246]
+LEFT.K: !!opencv-matrix
+   rows: 3
+   cols: 3
+   dt: d
+   data: [860.969, 0., 625.6476, 0., 857.25288, 301, 0., 0., 1. ]
+
+RIGHT.height: 282
+RIGHT.width: 640
+RIGHT.D: !!opencv-matrix
+   rows: 1
+   cols: 5
+   dt: d
+   data: [-0.22176, 0.10555, 0., 0., -0.03037]
+RIGHT.K: !!opencv-matrix
+   rows: 3
+   cols: 3
+   dt: d
+   data: [ 858.5975, 0., 643.2118, 0., 854.5459, 301, 0., 0., 1. ]
+
+R: !!opencv-matrix
+   rows: 3
+   cols: 3
+   dt: d
+   data: [ 0.999755303945577, -0.00699386365156457, 0.0209861407579137, 0.00679398603074026, 0.999931025525028, 0.00958049822717491, -0.0210516979481882, -0.00943557436991089, 0.999733862560336]
+T: !!opencv-matrix
+   rows: 3
+   cols: 1
+   dt: d
+   data: [-298.682454896771, -1.21884149110679, 2.03473948813391]

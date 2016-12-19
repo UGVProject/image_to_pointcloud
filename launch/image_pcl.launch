@@ -1,9 +1,16 @@
 <launch>
+  <arg name="rectify" value="true"/>
+  <arg name="calibration_file_position" value="$(find convert_pcl)/wide_stereo.yaml"/>
+
+
+
   <node name="image_to_pcl_node" pkg="convert_pcl" type="image_to_pcl_node" output="screen">
 
-    <param name="scale"                 value="2" />
-    <param name="intrinsic_filename"    value="$(find convert_pcl)/intrinsics.yml" />
-    <param name="extrinsic_filename"    value="$(find convert_pcl)/extrinsics.yml" />
+    <param name="rectify" value="$(arg rectify)" />
+    <param name="scale"                 value="0.5" />
+    <param name="calibration" value="$(arg calibration_file_position)" />
+    <!--<param name="intrinsic_filename"    value="$(find convert_pcl)/intrinsics.yml" />-->
+    <!--<param name="extrinsic_filename"    value="$(find convert_pcl)/extrinsics.yml" />-->
     <param name="disparity_size"        value="128" />
   </node>
 </launch>

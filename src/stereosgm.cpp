@@ -64,7 +64,7 @@ void stereosgm::StereoMatching(const cv::Mat &imLeft, const cv::Mat &imRight,
   // cv::imshow("image", output * 256 / disp_size);
   // cv::waitKey(1);
 
-  // visualizer(cloud);
+//   visualizer(cloud);
 }
 
 void stereosgm::visualizer(cv::Mat &cloud) {
@@ -102,27 +102,27 @@ void stereosgm::visualizer(cv::Mat &cloud) {
   basic_cloud_ptr->is_dense = true;
   // basic_cloud_ptr->
 
-  // boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
-  // viewer = simpleVis(basic_cloud_ptr);
-  // // viewer->spinOnce (100);
-  // // cv::imshow("image", output);
-  // // cv::waitKey(1);
-  // //
-  // while (!viewer->wasStopped ())
-  // {
-  //   viewer->spinOnce (100);
-  // //
-  //   boost::this_thread::sleep (boost::posix_time::microseconds (100));
-  // //
-  // //   // boost::mutex::scoped_lock updateLock(updateModelMutex);
-  // //   // if(update)
-  // //   // {
-  // //   //     if(!viewer->updatePointCloud(cloud, "sample cloud"))
-  // //   //       viewer->addPointCloud(cloud, colorHandler, "sample cloud");
-  // //   //     update = false;
-  // //   // }
-  // //   // updateLock.unlock();
-  // }
+//   boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
+//   viewer = simpleVis(basic_cloud_ptr);
+//    viewer->spinOnce (100);
+//    cv::imshow("image", output);
+//    cv::waitKey(1);
+//   //
+//   while (!viewer->wasStopped ())
+//   {
+//     viewer->spinOnce (100);
+//   //
+//     boost::this_thread::sleep (boost::posix_time::microseconds (100));
+//   //
+////       boost::mutex::scoped_lock updateLock(updateModelMutex);
+////       if(update)
+////       {
+////           if(!viewer->updatePointCloud(cloud, "sample cloud"))
+////             viewer->addPointCloud(cloud, colorHandler, "sample cloud");
+////           update = false;
+////       }
+////       updateLock.unlock();
+//   }
 }
 
 std::string stereosgm::type2str(int type) {
