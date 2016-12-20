@@ -49,8 +49,7 @@ int main(int argc, char **argv) {
   bool rectify = true;
   igb.scale = 0.5;
   igb.disp_size = 128;
-  // cv::Size fsize(640, 300);
-  cv::Size fsize(640, 208);
+
   string calibration = ros::package::getPath("image_to_pointcloud") + "/wide_stereo.yaml";
   std::string intrinsic_filename, extrinsic_filename;
   intrinsic_filename =
@@ -131,10 +130,6 @@ int main(int argc, char **argv) {
 
   }
 
-  // ros::NodeHandle nodeHandler;
-//  ros::Subscriber sub =
-//      nh.subscribe("/wide/image_raw", 1, &ImageGrabber::GrabImage, &igb);
-
     message_filters::Subscriber<sensor_msgs::Image> img_sub1(nh, "/wide/left/image_raw", 1 );
 
     message_filters::Subscriber<sensor_msgs::Image> img_sub2(nh, "/wide/right/image_raw", 1 );
@@ -169,7 +164,7 @@ int main(int argc, char **argv) {
 }
 
 void ImageGrabber::GrabImage(const sensor_msgs::ImageConstPtr &msg1, const sensor_msgs::ImageConstPtr &msg2) {
-  // Copy the ros image message to cv::Mat.
+    // Copy the ros image message to cv::Mat.
 //    head = msg1->header;
     cv_bridge::CvImagePtr cv_ptr1, cv_ptr2;
     try {
@@ -194,16 +189,16 @@ void ImageGrabber::GrabImage(const sensor_msgs::ImageConstPtr &msg1, const senso
     cv::resize(imLeft1, imLeft_scale, rzSize);
     cv::resize(imRight1, imRight_scale, rzSize);
 
-  if (do_rectify) {
-    Mat imLeftRec, imRightRec;
-      remap(imLeft_scale(Range(int(140 * scale), int(704 * scale)), Range::all()),
-            imLeftRec, M1l, M2l, cv::INTER_LINEAR);
-      remap(imRight_scale(Range(int(140 * scale), int(704 * scale)), Range::all()),
-            imRightRec, M1r, M2r, cv::INTER_LINEAR);
-    mpMATCHING->StereoMatching(imLeftRec, imRightRec, Q,
-                               cv_ptr1->header.stamp.toSec());
-  } else {
-    mpMATCHING->StereoMatching(imLeft1, imRight1, Q,
-                               cv_ptr1->header.stamp.toSec());
-  }
+    if (do_rectify) {
+        Mat imLeftRec, imRightRec;
+        remap(imLeft_scale(Range(int(140 * scale), int(704 * scale)), Range::all()),
+              imLeftRec, M1l, M2l, cv::INTER_LINEAR);
+        remap(imRight_scale(Range(int(140 * scale), int(704 * scale)), Range::all()),
+              imRightRec, M1r, M2r, cv::INTER_LINEAR);
+        mpMATCHING->StereoMatching(imLeftRec, imRightRec, Q,
+                                   cv_ptr1->header.stamp.toSec());
+    } else {
+        mpMATCHING->StereoMatching(imLeft1, imRight1, Q,
+                                   cv_ptr1->header.stamp.toSec());
+    }
 }
