@@ -16,16 +16,12 @@ find_package(CUDA REQUIRED)
 set(CUDA_ARCH "-arch=sm_50" CACHE STRING "Value of the NVCC -arch option.")
 # SET(CUDA_NVCC_FLAGS "${CUDA_NVCC_FLAGS} ${CUDA_ARCH}")
 
-#find_package(PCL 1.2 REQUIRED)
-
-find_package(OpenCV REQUIRED core) # dammy
+find_package(OpenCV REQUIRED core)
 if(OpenCV_VERSION VERSION_LESS 3.0)
 	find_package(OpenCV REQUIRED core highgui imgproc)  # 2.x
 else()
 	find_package(OpenCV REQUIRED core highgui imgproc imgcodecs videoio calib3d objdetect) # 3.x
 endif()
-
-#include_directories(${PCL_INCLUDE_DIRS})
 
 include_directories(include)
 
@@ -39,27 +35,37 @@ find_package(catkin REQUIRED COMPONENTS
 		std_msgs
         message_filters
 		genmsg
-		)
-###
+        message_generation
+        )
+## Generate messages in the 'msg' folder
+add_message_files(
+        FILES
+        MapInfo.msg
+)
+
+## Generate added messages and services with any dependencies listed here
+generate_messages(
+        DEPENDENCIES
+        std_msgs
+        geometry_msgs
+)
 catkin_package(
 #        INCLUDE_DIRS include
 #        LIBRARIES ${PROJECT_NAME} ${catkin_INCLUDE_DIRS}
-#        CATKIN_DEPENDS roscpp std_msgs
+        CATKIN_DEPENDS roscpp std_msgs message_runtime
 #        image_transport
 #        DEPENDS opencv
 )
 
 include_directories(${OpenCV_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
 
-#link_directories(${PCL_LIBRARY_DIRS} )
-
-#add_definitions(${PCL_DEFINITIONS})
-
 CUDA_ADD_EXECUTABLE(image_to_pcl_node ${SRC_LIST} ${CUDA_SRC})
 # ADD_EXECUTABLE(image_to_pcl_node ${SRC_LIST} ${CUDA_SRC})
 add_library(image_to_pointcloud ${SRC_LIST} )
 
-#TARGET_LINK_LIBRARIES(image_to_pcl_node ${PROJECT_SOURCE_DIR}/lib/libsgm.a ${CUDA_LIBRARIES} ${catkin_LIBRARIES} ${CUDA_nppi_LIBRARY} ${OpenCV_LIBS} ${PCL_LIBRARIES})
 TARGET_LINK_LIBRARIES(image_to_pcl_node ${PROJECT_SOURCE_DIR}/lib/libsgm.a ${CUDA_LIBRARIES} ${catkin_LIBRARIES} ${CUDA_nppi_LIBRARY} ${OpenCV_LIBS} )
+
+ADD_EXECUTABLE(lcm2ros_node src/lcm2ros_node.cpp include/pose_t.hpp)
+TARGET_LINK_LIBRARIES(lcm2ros_node ${catkin_LIBRARIES} -llcm )
 
 # generate_messages(DEPENDENCIES std_msgs)
