@@ -3,7 +3,7 @@ project(image_to_pointcloud)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
-set(SRC_LIST src/image_pcl_node.cpp src/stereosgm.cpp)
+set(SRC_LIST src/image_pcl_node.cpp src/stereosgm.cpp include/timer.h)
 
 # rosbuild_init()
 
@@ -22,9 +22,7 @@ if(OpenCV_VERSION VERSION_LESS 3.0)
 else()
 	find_package(OpenCV REQUIRED core highgui imgproc imgcodecs videoio calib3d objdetect) # 3.x
 endif()
-
-include_directories(include)
-
+#find_package(Eigen3 REQUIRED)
 find_package(catkin REQUIRED COMPONENTS
         pcl_ros
 		cv_bridge
@@ -36,6 +34,7 @@ find_package(catkin REQUIRED COMPONENTS
         message_filters
 		genmsg
         message_generation
+        eigen_conversions
         )
 ## Generate messages in the 'msg' folder
 add_message_files(
@@ -57,15 +56,26 @@ catkin_package(
 #        DEPENDS opencv
 )
 
+include_directories(include)
 include_directories(${OpenCV_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
 
 CUDA_ADD_EXECUTABLE(image_to_pcl_node ${SRC_LIST} ${CUDA_SRC})
 # ADD_EXECUTABLE(image_to_pcl_node ${SRC_LIST} ${CUDA_SRC})
 add_library(image_to_pointcloud ${SRC_LIST} )
 
-TARGET_LINK_LIBRARIES(image_to_pcl_node ${PROJECT_SOURCE_DIR}/lib/libsgm.a ${CUDA_LIBRARIES} ${catkin_LIBRARIES} ${CUDA_nppi_LIBRARY} ${OpenCV_LIBS} )
+TARGET_LINK_LIBRARIES(image_to_pcl_node
+        ${PROJECT_SOURCE_DIR}/lib/libsgm.a
+        ${CUDA_LIBRARIES}
+#        ${Eigen3_LIBRARIES}
+        ${catkin_LIBRARIES}
+        ${CUDA_nppi_LIBRARY}
+        ${OpenCV_LIBS}
+        )
 
 ADD_EXECUTABLE(lcm2ros_node src/lcm2ros_node.cpp include/pose_t.hpp)
-TARGET_LINK_LIBRARIES(lcm2ros_node ${catkin_LIBRARIES} -llcm )
+TARGET_LINK_LIBRARIES(lcm2ros_node
+        ${catkin_LIBRARIES}
+        -llcm
+        )
 
 # generate_messages(DEPENDENCIES std_msgs)

@@ -3,6 +3,8 @@
 // Modified by Zhang Handuo on 22/04/16.
 
 #include "../include/stereosgm.h"
+#include "../include/timer.h"
+
 stereosgm::stereosgm() : mWidth(640), mHeight(300), disp_size(128) {}
 
 stereosgm::~stereosgm() {}
@@ -10,6 +12,9 @@ stereosgm::~stereosgm() {}
 void stereosgm::StereoMatching(const cv::Mat &imLeft, const cv::Mat &imRight,
                                cv::Mat Q, const double &timestamp) {
   int bits = 8;
+  Util::CPPTimer timer;
+
+  timer.tic();
   switch (imLeft.type()) {
   case CV_8UC1:
     bits = 8;
@@ -27,26 +32,27 @@ void stereosgm::StereoMatching(const cv::Mat &imLeft, const cv::Mat &imRight,
     cvtColor(imLeft, left, CV_RGB2GRAY);
     cvtColor(imRight, right, CV_RGB2GRAY);
   }
-  // struct timeval start, end;
-  // long mtime, seconds, useconds;
+
   sgm::StereoSGM ssgm(imLeft.cols, imLeft.rows, disp_size, bits, 8,
                       sgm::EXECUTE_INOUT_HOST2HOST);
-  cv::Mat output(cv::Size(imLeft.cols, imLeft.rows), CV_8UC1);
+  output = cv::Mat(cv::Size(imLeft.cols, imLeft.rows), CV_8UC1);
 
-  // gettimeofday(&start, NULL);
   ssgm.execute(left.data, right.data, (void **)&output.data);
-  // gettimeofday(&end, NULL);
-  for (int r = 1; r < output.rows - 1; r++) {
-    for (int c = 1; c < output.cols - 1; c++) {
-      if (output.at<uchar>(r, c) == 0) {
-        if (output.at<uchar>(r, c + 1) > output.at<uchar>(r, c - 1)) {
-          output.at<uchar>(r, c) = output.at<uchar>(r, c + 1);
-        } else {
-          output.at<uchar>(r, c) = output.at<uchar>(r, c - 1);
-        }
-      }
-    }
-  }
+
+//  for (int r = 1; r < output.rows - 1; r++) {
+//    for (int c = 1; c < output.cols - 1; c++) {
+//      if (output.at<uchar>(r, c) == 0) {
+//        if (output.at<uchar>(r, c + 1) > output.at<uchar>(r, c - 1)) {
+//          output.at<uchar>(r, c) = output.at<uchar>(r, c + 1);
+//        } else {
+//          output.at<uchar>(r, c) = output.at<uchar>(r, c - 1);
+//        }
+//      }
+//    }
+//  }
+  reprojectTo3D(output, Q, true);
+
+
   // seconds  = end.tv_sec  - start.tv_sec;
   // useconds = end.tv_usec - start.tv_usec;
   // mtime = ((seconds) * 1000 + useconds/1000.0) + 0.5;
@@ -55,7 +61,6 @@ void stereosgm::StereoMatching(const cv::Mat &imLeft, const cv::Mat &imRight,
   // 3D point cloud caluculation
   // cv::Mat cloud(output.size(), CV_32FC3);
   // reprojectImageTo3D(output, cloud, Q, true);
-  reprojectTo3D(output, Q, true);
 
   // std::cout << "image type: " << type2str(left_color.type() ).c_str() <<
   // std::endl;
@@ -64,7 +69,9 @@ void stereosgm::StereoMatching(const cv::Mat &imLeft, const cv::Mat &imRight,
   // cv::imshow("image", output * 256 / disp_size);
   // cv::waitKey(1);
 
-//   visualizer(cloud);
+  // visualizer(cloud);
+
+    std::cout << "Elapsed stereo matching time: " << timer.end() << "milliseconds!"  << std::endl;
 }
 
 void stereosgm::visualizer(cv::Mat &cloud) {
@@ -164,18 +171,6 @@ std::string stereosgm::type2str(int type) {
   return r;
 }
 
-bool stereosgm::compare_mean(const cv::Point3i &a, const cv::Point3i &b) {
-  return a.x > b.x;
-}
-
-bool stereosgm::compare_row(const cv::Point3i &a, const cv::Point3i &b) {
-  return a.y > b.y;
-}
-
-bool stereosgm::compare_col(const cv::Point3i &a, const cv::Point3i &b) {
-  return a.z > b.z;
-}
-
 boost::shared_ptr<pcl::visualization::PCLVisualizer>
 stereosgm::simpleVis(pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr cloud) {
   // --------------------------------------------
@@ -196,6 +191,7 @@ stereosgm::simpleVis(pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr cloud) {
   // viewer->updateCamera();
   return (viewer);
 }
+
 void stereosgm::reprojectTo3D(cv::Mat &disparity, cv::Mat &Q,
                               bool handleMissingValues) {
   int stype = disparity.type();
