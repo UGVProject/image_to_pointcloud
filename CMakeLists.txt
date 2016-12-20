@@ -60,6 +60,6 @@ CUDA_ADD_EXECUTABLE(image_to_pcl_node ${SRC_LIST} ${CUDA_SRC})
 add_library(image_to_pointcloud ${SRC_LIST} )
 
 #TARGET_LINK_LIBRARIES(image_to_pcl_node ${PROJECT_SOURCE_DIR}/lib/libsgm.a ${CUDA_LIBRARIES} ${catkin_LIBRARIES} ${CUDA_nppi_LIBRARY} ${OpenCV_LIBS} ${PCL_LIBRARIES})
-TARGET_LINK_LIBRARIES(image_to_pcl_node ${PROJECT_SOURCE_DIR}/lib/libsgm.a ${CUDA_LIBRARIES} ${catkin_LIBRARIES} ${CUDA_nppi_LIBRARY} ${OpenCV_LIBS} )
+TARGET_LINK_LIBRARIES(image_to_pcl_node ${PROJECT_SOURCE_DIR}/lib/libsgm.a ${CUDA_LIBRARIES} ${catkin_LIBRARIES} ${CUDA_nppi_LIBRARY} ${OpenCV_LIBS} -llcm)
 
 # generate_messages(DEPENDENCIES std_msgs)

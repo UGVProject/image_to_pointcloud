@@ -19,6 +19,11 @@
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
 
+#include <lcm/lcm-cpp.hpp>
+#include "example_t.hpp"
+#include <sys/select.h>
+
+
 using namespace std;
 using namespace cv;
 using namespace message_filters;
@@ -37,6 +42,31 @@ public:
 //  int height_up_cut = 140, height_down_cut = 704;
   cv::Mat M1l, M2l, M1r, M2r, Q;
   int disp_size;
+};
+
+class Handler{
+public:
+    ~Handler() {}
+
+void handleMessage(const lcm::ReceiveBuffer* rbuf,
+                   const std::string& chan,
+                   const exlcm::example_t* msg)
+    {
+        int i;
+        printf("Received message on channel \"%s\":\n", chan.c_str());
+        printf("  timestamp   = %lld\n", (long long)msg->timestamp);
+        printf("  position    = (%f, %f, %f)\n",
+               msg->position[0], msg->position[1], msg->position[2]);
+        printf("  orientation = (%f, %f, %f, %f)\n",
+               msg->orientation[0], msg->orientation[1],
+               msg->orientation[2], msg->orientation[3]);
+        printf("  ranges:");
+        for(i = 0; i < msg->num_ranges; i++)
+            printf(" %d", msg->ranges[i]);
+        printf("\n");
+        printf("  name        = '%s'\n", msg->name.c_str());
+        printf("  enabled     = %d\n", msg->enabled);
+    }
 };
 
 int main(int argc, char **argv) {
@@ -148,8 +178,17 @@ int main(int argc, char **argv) {
   ros::Publisher point_pub =
       nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/camera/points", 1);
 
-
     sync.registerCallback(boost::bind(&ImageGrabber::GrabImage, &igb, _1, _2 ));
+
+    lcm::LCM lcm;
+    if(!lcm.good()){
+        printf("LCM connection is bad~~ ");
+        return 1;
+
+    }
+    Handler handlerObject;
+    lcm.subscribe("EXAMPLE", &Handler::handleMessage, &handlerObject);
+
 
   // ros::spin();
 //  ros::Rate loop_rate(30);
@@ -159,7 +198,34 @@ int main(int argc, char **argv) {
       ros::Time::now().toNSec() / 1000ull;
       point_pub.publish(SGM_Matching.basic_cloud_ptr);
     }
-    ros::spinOnce();
+      ros::spinOnce();
+      int lcm_fd = lcm.getFileno();
+      fd_set fds;
+      FD_ZERO(&fds);
+      FD_SET(lcm_fd, &fds);
+
+      // wait a limited amount of time for an incoming message
+      struct timeval timeout = {
+              0,  // seconds
+              0   // microseconds
+      };
+
+      int status = select(lcm_fd + 1, &fds, NULL, NULL, &timeout);
+
+//      if(FD_ISSET(lcm_fd, &fds)) {
+//          // LCM has events ready to be processed.
+//          lcm.handle();
+//      }
+      if(0 == status) {
+          // no messages
+          printf("waiting for message\n");
+      } else if(FD_ISSET(lcm_fd, &fds)) {
+          // LCM has events ready to be processed.
+          lcm.handle();
+      }
+
+//    lcm.handle();
+
 //    loop_rate.sleep();
   }
 
