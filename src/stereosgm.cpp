@@ -50,7 +50,7 @@ void stereosgm::StereoMatching(const cv::Mat &imLeft, const cv::Mat &imRight,
 //      }
 //    }
 //  }
-  reprojectTo3D(output, Q, true);
+//  reprojectTo3D(output, Q, true);
 
 
   // seconds  = end.tv_sec  - start.tv_sec;
@@ -71,7 +71,7 @@ void stereosgm::StereoMatching(const cv::Mat &imLeft, const cv::Mat &imRight,
 
   // visualizer(cloud);
 
-    std::cout << "Elapsed stereo matching time: " << timer.end() << "milliseconds!"  << std::endl;
+//    std::cout << "Elapsed stereo matching time: " << timer.end() << "milliseconds!"  << std::endl;
 }
 
 void stereosgm::visualizer(cv::Mat &cloud) {

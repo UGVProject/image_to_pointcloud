@@ -17,7 +17,7 @@ namespace exlcm
     class pose_t
     {
     public:
-        int64_t    utime;
+        double     utime;
 
         float      resolution;
 
@@ -129,7 +129,7 @@ namespace exlcm
     {
         int pos = 0, tlen;
 
-        tlen = __int64_t_encode_array(buf, offset + pos, maxlen - pos, &this->utime, 1);
+        tlen = __double_encode_array(buf, offset + pos, maxlen - pos, &this->utime, 1);
         if(tlen < 0) return tlen; else pos += tlen;
 
         tlen = __float_encode_array(buf, offset + pos, maxlen - pos, &this->resolution, 1);
@@ -161,7 +161,7 @@ namespace exlcm
     {
         int pos = 0, tlen;
 
-        tlen = __int64_t_decode_array(buf, offset + pos, maxlen - pos, &this->utime, 1);
+        tlen = __double_decode_array(buf, offset + pos, maxlen - pos, &this->utime, 1);
         if(tlen < 0) return tlen; else pos += tlen;
 
         tlen = __float_decode_array(buf, offset + pos, maxlen - pos, &this->resolution, 1);
@@ -195,7 +195,7 @@ namespace exlcm
     int pose_t::_getEncodedSizeNoHash() const
     {
         int enc_size = 0;
-        enc_size += __int64_t_encoded_array_size(NULL, 1);
+        enc_size += __double_encoded_array_size(NULL, 1);
         enc_size += __float_encoded_array_size(NULL, 1);
         enc_size += __int32_t_encoded_array_size(NULL, 1);
         enc_size += __int32_t_encoded_array_size(NULL, 1);
@@ -208,7 +208,7 @@ namespace exlcm
 
     uint64_t pose_t::_computeHash(const __lcm_hash_ptr *)
     {
-        uint64_t hash = 0x627077a6e40b9ed3LL;
+        uint64_t hash = 0x1465d22fe3ac578fLL;
         return (hash<<1) + ((hash>>63)&1);
     }
 

@@ -50,13 +50,17 @@ void LCM2ROS::poseBodyHandler(const lcm::ReceiveBuffer* rbuf, const std::string 
     map_info.height = msg->height;
     map_info.status = msg->status;
     map_info.origin.position.x = msg->position[0];
-    map_info.origin.position.y = msg->position[0];
-    map_info.origin.position.z = msg->position[0];
+    map_info.origin.position.y = msg->position[1];
+    map_info.origin.position.z = msg->position[2];
     map_info.origin.orientation.x = msg->orientation[0];
     map_info.origin.orientation.y = msg->orientation[1];
     map_info.origin.orientation.z = msg->orientation[2];
     map_info.origin.orientation.w = msg->orientation[3];
-
+//    cout << "position.x = " << map_info.origin.position.x << endl
+//         << "position.y = " << map_info.origin.position.y << endl
+//         << "position.z = " << map_info.origin.position.z << endl
+//         << "rotation.x = " << map_info.origin.orientation.x << endl
+//         << "rotation.y = " << map_info.origin.orientation.y << endl;
     pose_body_pub_.publish(map_info);
 }
 
@@ -70,7 +74,7 @@ int main(int argc, char **argv) {
     ros::NodeHandle nh;
 
     LCM2ROS handlerObject(lcm, nh);
-    cout << "\nlcm2ros translator ready\n";
+    cout << "\nlcm2ros translator ready!\n";
 
     while(0 == lcm->handle());
     return 0;
