@@ -53,8 +53,8 @@ void stereosgm::StereoMatching(const cv::Mat &imLeft, const cv::Mat &imRight,
   // std::cout << "Elapsed time: " << mtime << "milliseconds!"  << std::endl;
 
   // 3D point cloud caluculation
-  // cv::Mat cloud(output.size(), CV_32FC3);
-  // reprojectImageTo3D(output, cloud, Q, true);
+//   cv::Mat cloud(output.size(), CV_32FC3);
+//   reprojectImageTo3D(output, cloud, Q, true);
   reprojectTo3D(output, Q, true);
 
   // std::cout << "image type: " << type2str(left_color.type() ).c_str() <<
@@ -80,9 +80,9 @@ void stereosgm::visualizer(cv::Mat &cloud) {
       cv::Vec3f cloudpoint = cloud.at<cv::Vec3f>(i, j);
       // if (std::isfinite(cloudpoint[0]) && std::isfinite(cloudpoint[1]) &&
       //     std::isfinite(cloudpoint[2])) {
-      basic_point.z = cloudpoint[2] * 0.001f;
-      basic_point.x = cloudpoint[0] * 0.001f;
-      basic_point.y = cloudpoint[1] * 0.001f;
+      basic_point.z = cloudpoint[2] * 0.1f;
+      basic_point.x = cloudpoint[0] * 0.1f;
+      basic_point.y = cloudpoint[1] * 0.1f;
       uint32_t rgb = (static_cast<uint32_t>(r) << 16 |
                       static_cast<uint32_t>(r) << 8 | static_cast<uint32_t>(r));
       basic_point.rgb = *reinterpret_cast<float *>(&rgb);
@@ -111,7 +111,7 @@ void stereosgm::visualizer(cv::Mat &cloud) {
 //   while (!viewer->wasStopped ())
 //   {
 //     viewer->spinOnce (100);
-//   //
+////   //
 //     boost::this_thread::sleep (boost::posix_time::microseconds (100));
 //   //
 ////       boost::mutex::scoped_lock updateLock(updateModelMutex);
@@ -123,57 +123,6 @@ void stereosgm::visualizer(cv::Mat &cloud) {
 ////       }
 ////       updateLock.unlock();
 //   }
-}
-
-std::string stereosgm::type2str(int type) {
-  std::string r;
-
-  uchar depth = type & CV_MAT_DEPTH_MASK;
-  uchar chans = 1 + (type >> CV_CN_SHIFT);
-
-  switch (depth) {
-  case CV_8U:
-    r = "8U";
-    break;
-  case CV_8S:
-    r = "8S";
-    break;
-  case CV_16U:
-    r = "16U";
-    break;
-  case CV_16S:
-    r = "16S";
-    break;
-  case CV_32S:
-    r = "32S";
-    break;
-  case CV_32F:
-    r = "32F";
-    break;
-  case CV_64F:
-    r = "64F";
-    break;
-  default:
-    r = "User";
-    break;
-  }
-
-  r += "C";
-  r += (chans + '0');
-
-  return r;
-}
-
-bool stereosgm::compare_mean(const cv::Point3i &a, const cv::Point3i &b) {
-  return a.x > b.x;
-}
-
-bool stereosgm::compare_row(const cv::Point3i &a, const cv::Point3i &b) {
-  return a.y > b.y;
-}
-
-bool stereosgm::compare_col(const cv::Point3i &a, const cv::Point3i &b) {
-  return a.z > b.z;
 }
 
 boost::shared_ptr<pcl::visualization::PCLVisualizer>
@@ -190,9 +139,9 @@ stereosgm::simpleVis(pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr cloud) {
   viewer->addPointCloud<pcl::PointXYZRGB>(cloud, rgb, "sample cloud");
   viewer->setPointCloudRenderingProperties(
       pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "sample cloud");
-  viewer->addCoordinateSystem(1.0);
+  viewer->addCoordinateSystem(0.2);
   viewer->initCameraParameters();
-  viewer->setCameraPosition(0, 0, 0, 0, 0, 1, 0, -1, 0);
+  viewer->setCameraPosition(0.5, 0, 0, 0, 0, 1, 0, -1, 0);
   // viewer->updateCamera();
   return (viewer);
 }
@@ -266,4 +215,22 @@ void stereosgm::reprojectTo3D(cv::Mat &disparity, cv::Mat &Q,
   basic_cloud_ptr->height = 1;
   basic_cloud_ptr->header.frame_id = "map";
   basic_cloud_ptr->is_dense = true;
+
+//   boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
+//   viewer = simpleVis(basic_cloud_ptr);
+//    while (!viewer->wasStopped ())
+//   {
+//     viewer->spinOnce (100);
+//////   //
+//     boost::this_thread::sleep (boost::posix_time::microseconds (100));
+////   //
+//////       boost::mutex::scoped_lock updateLock(updateModelMutex);
+//////       if(update)
+//////       {
+//////           if(!viewer->updatePointCloud(cloud, "sample cloud"))
+//////             viewer->addPointCloud(cloud, colorHandler, "sample cloud");
+//////           update = false;
+//////       }
+//////       updateLock.unlock();
+//   }
 }
