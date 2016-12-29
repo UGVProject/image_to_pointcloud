@@ -39,10 +39,11 @@ public:
   // bool init(const uint64_t cameraUid );
 
   void StereoMatching(const cv::Mat &imLeft, const cv::Mat &imRight, cv::Mat Q,
-                      const double &timestamp);
+                      const double &timestamp,
+                      const image_to_pointcloud::MapInfoConstPtr& info);
 //  void visualizer(cv::Mat &cloud);
 
-  void reprojectTo3D(cv::Mat &, cv::Mat &, bool, const image_to_pointcloud::MapInfoConstPtr& info);
+
 
 //  void MapGen( const image_to_pointcloud::MapInfoConstPtr& info);
 
@@ -76,5 +77,5 @@ private:
 
   boost::shared_ptr<pcl::visualization::PCLVisualizer>
   simpleVis(pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr cloud);
-
+  void reprojectTo3D(cv::Mat &, cv::Mat &, bool, const image_to_pointcloud::MapInfoConstPtr& info);
 };

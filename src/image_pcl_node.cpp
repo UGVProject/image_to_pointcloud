@@ -219,12 +219,12 @@ void ImageGrabber::GrabImage(const sensor_msgs::ImageConstPtr &msg1, const senso
         remap(imRight_scale(Range(int(140 * scale), int(704 * scale)), Range::all()),
               imRightRec, M1r, M2r, cv::INTER_LINEAR);
         mpMATCHING->StereoMatching(imLeftRec, imRightRec, Q,
-                                   cv_ptr1->header.stamp.toSec());
-        mpMATCHING->reprojectTo3D(mpMATCHING->output, Q, true, info);
+                                   cv_ptr1->header.stamp.toSec(), info);
+//        mpMATCHING->reprojectTo3D(mpMATCHING->output, Q, true, info);
     } else {
         mpMATCHING->StereoMatching(imLeft_scale, imRight_scale, Q,
-                                   cv_ptr1->header.stamp.toSec());
-        mpMATCHING->reprojectTo3D(mpMATCHING->output, Q, true, info);
+                                   cv_ptr1->header.stamp.toSec(), info);
+//        mpMATCHING->reprojectTo3D(mpMATCHING->output, Q, true, info);
     }
 
     GrayPoint newpoint;
@@ -234,10 +234,10 @@ void ImageGrabber::GrabImage(const sensor_msgs::ImageConstPtr &msg1, const senso
     viewer.addLine(viewpoint, newpoint, 0, 0, 1, to_string(info->header.seq));
     viewpoint = newpoint;
 
-    ColorCloud::Ptr tmp_cloud(new ColorCloud());
-    voxel.setInputCloud( mpMATCHING->final_map );
-    voxel.filter( *tmp_cloud );
-    mpMATCHING->final_map = tmp_cloud;
+//    ColorCloud::Ptr tmp_cloud(new ColorCloud());
+//    voxel.setInputCloud( mpMATCHING->final_map );
+//    voxel.filter( *tmp_cloud );
+//    mpMATCHING->final_map = tmp_cloud;
 
     viewer.updatePointCloud(mpMATCHING->final_map, "UGV_SLAM_map");
 }

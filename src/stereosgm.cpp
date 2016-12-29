@@ -10,12 +10,14 @@
 
 stereosgm::stereosgm() : mWidth(640), mHeight(282), disp_size(128) {
     final_map = ColorCloud::Ptr (new ColorCloud());
+//    cv::Mat output(cv::Size(imLeft.cols, imLeft.rows), CV_8UC1);
 }
 
 stereosgm::~stereosgm() {}
 
 void stereosgm::StereoMatching(const cv::Mat &imLeft, const cv::Mat &imRight,
-                               cv::Mat Q, const double &timestamp) {
+                               cv::Mat Q, const double &timestamp,
+                               const image_to_pointcloud::MapInfoConstPtr& info) {
     int bits = 8;
     switch (imLeft.type()) {
         case CV_8UC1:
@@ -57,7 +59,7 @@ void stereosgm::StereoMatching(const cv::Mat &imLeft, const cv::Mat &imRight,
             }
         }
     }
-//    reprojectTo3D(output, Q, true);
+    reprojectTo3D(output, Q, true, info);
 
 }
 
@@ -146,11 +148,7 @@ void stereosgm::reprojectTo3D(cv::Mat &disparity, cv::Mat &Q,
     pcl::transformPointCloud(*cloud, *transformed_cloud, transform);
 
     *final_map += *transformed_cloud;
-//    ColorCloud::Ptr tmp_cloud(new ColorCloud());
-//    voxel.setInputCloud( final_map );
-//    voxel.filter( *tmp_cloud );
-//    final_map = tmp_cloud;
-//    cout<<"ddd"<<endl;
+//    *final_map = *cloud;
 
     ROS_INFO("Added refined cloud ID: %d; Using time %.4fs", info->header.seq, timer_cloud.end());
 
