@@ -27,6 +27,7 @@
 #include <string>
 
 class stereosgm {
+
 public:
   stereosgm();
   virtual ~stereosgm();
@@ -36,8 +37,10 @@ public:
                       const double &timestamp);
   void visualizer(cv::Mat &cloud);
   bool update;
+  typedef pcl::PointXYZRGB ColorPoint;
+  typedef pcl::PointCloud<pcl::PointXYZRGB> ColorCloud;
   // pcl::PointXYZRGB basic_point;
-  pcl::PointCloud<pcl::PointXYZRGB>::Ptr basic_cloud_ptr;
+  ColorCloud::Ptr basic_cloud_ptr;
 //  boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
 private:
   double shutter_speed;
