@@ -3,7 +3,10 @@
 // Modified by Zhang Handuo on 22/04/16.
 
 #include "../include/stereosgm.h"
-stereosgm::stereosgm() : mWidth(640), mHeight(300), disp_size(128) {}
+stereosgm::stereosgm() : mWidth(640), mHeight(300), disp_size(128) {
+    basic_cloud_ptr = pcl::PointCloud<pcl::PointXYZRGB>::Ptr(
+            new pcl::PointCloud<pcl::PointXYZRGB>);
+}
 
 stereosgm::~stereosgm() {}
 
@@ -36,17 +39,17 @@ void stereosgm::StereoMatching(const cv::Mat &imLeft, const cv::Mat &imRight,
   // gettimeofday(&start, NULL);
   ssgm.execute(left.data, right.data, (void **)&output.data);
   // gettimeofday(&end, NULL);
-  for (int r = 1; r < output.rows - 1; r++) {
-    for (int c = 1; c < output.cols - 1; c++) {
-      if (output.at<uchar>(r, c) == 0) {
-        if (output.at<uchar>(r, c + 1) > output.at<uchar>(r, c - 1)) {
-          output.at<uchar>(r, c) = output.at<uchar>(r, c + 1);
-        } else {
-          output.at<uchar>(r, c) = output.at<uchar>(r, c - 1);
-        }
-      }
-    }
-  }
+//  for (int r = 1; r < output.rows - 1; r++) {
+//    for (int c = 1; c < output.cols - 1; c++) {
+//      if (output.at<uchar>(r, c) == 0) {
+//        if (output.at<uchar>(r, c + 1) > output.at<uchar>(r, c - 1)) {
+//          output.at<uchar>(r, c) = output.at<uchar>(r, c + 1);
+//        } else {
+//          output.at<uchar>(r, c) = output.at<uchar>(r, c - 1);
+//        }
+//      }
+//    }
+//  }
   // seconds  = end.tv_sec  - start.tv_sec;
   // useconds = end.tv_usec - start.tv_usec;
   // mtime = ((seconds) * 1000 + useconds/1000.0) + 0.5;
@@ -68,42 +71,36 @@ void stereosgm::StereoMatching(const cv::Mat &imLeft, const cv::Mat &imRight,
 }
 
 void stereosgm::visualizer(cv::Mat &cloud) {
-  basic_cloud_ptr = pcl::PointCloud<pcl::PointXYZRGB>::Ptr(
-      new pcl::PointCloud<pcl::PointXYZRGB>);
+//  basic_cloud_ptr = pcl::PointCloud<pcl::PointXYZRGB>::Ptr(
+//      new pcl::PointCloud<pcl::PointXYZRGB>);
   uint8_t r;
-  for (int i = 0; i < cloud.rows; i++) {
+  for (int i = 0; i < 100; i++) {
     uchar *rgb_ptr = left.ptr<uchar>(i);
-    for (int j = 0; j < cloud.cols; j++) {
+    for (int j = 0; j < 150; j++) {
       r = rgb_ptr[j];
 
       pcl::PointXYZRGB basic_point;
       cv::Vec3f cloudpoint = cloud.at<cv::Vec3f>(i, j);
-      // if (std::isfinite(cloudpoint[0]) && std::isfinite(cloudpoint[1]) &&
-      //     std::isfinite(cloudpoint[2])) {
-      basic_point.z = cloudpoint[2] * 0.1f;
-      basic_point.x = cloudpoint[0] * 0.1f;
-      basic_point.y = cloudpoint[1] * 0.1f;
+      basic_point.z = cloudpoint[2] * 0.01f;
+      basic_point.x = cloudpoint[0] * 0.01f;
+      basic_point.y = cloudpoint[1] * 0.01f;
       uint32_t rgb = (static_cast<uint32_t>(r) << 16 |
                       static_cast<uint32_t>(r) << 8 | static_cast<uint32_t>(r));
       basic_point.rgb = *reinterpret_cast<float *>(&rgb);
       basic_cloud_ptr->points.push_back(basic_point);
-      // if ((i < 50) && (i > 20) && (j < 550) && (j > 450)) {
-      //   std::cout << "x: " << basic_point.x << " and y: " << basic_point.y
-      //             << " and z: " << basic_point.z << std::endl;
-      // }
-      // }
+
     }
   }
 
   // std::cout<<points.size ()<<std::endl;
-  basic_cloud_ptr->width = (int)basic_cloud_ptr->points.size();
-  basic_cloud_ptr->height = 1;
+//  basic_cloud_ptr->width = (int)basic_cloud_ptr->points.size();
+//  basic_cloud_ptr->height = 1;
   basic_cloud_ptr->header.frame_id = "map";
-  basic_cloud_ptr->is_dense = true;
+  basic_cloud_ptr->is_dense = false;
   // basic_cloud_ptr->
 
 //   boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
-//   viewer = simpleVis(basic_cloud_ptr);
+
 //    viewer->spinOnce (100);
 //    cv::imshow("image", output);
 //    cv::waitKey(1);
@@ -148,8 +145,7 @@ stereosgm::simpleVis(pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr cloud) {
 void stereosgm::reprojectTo3D(cv::Mat &disparity, cv::Mat &Q,
                               bool handleMissingValues) {
   int stype = disparity.type();
-  basic_cloud_ptr = pcl::PointCloud<pcl::PointXYZRGB>::Ptr(
-      new pcl::PointCloud<pcl::PointXYZRGB>);
+
   CV_Assert(stype == CV_8UC1 || stype == CV_16SC1 || stype == CV_32SC1 ||
             stype == CV_32FC1);
   CV_Assert(Q.size() == cv::Size(4, 4));
@@ -201,6 +197,8 @@ void stereosgm::reprojectTo3D(cv::Mat &disparity, cv::Mat &Q,
       pcl::PointXYZRGB basic_point;
 
       basic_point.z = (float)Z * 0.001f;
+        if( (basic_point.z > 35) ||(basic_point.z < 0.2) )
+            continue;
       basic_point.x = (float)X * 0.001f;
       basic_point.y = (float)Y * 0.001f;
       uint32_t rgb = (static_cast<uint32_t>(r) << 16 |
@@ -214,23 +212,6 @@ void stereosgm::reprojectTo3D(cv::Mat &disparity, cv::Mat &Q,
   basic_cloud_ptr->width = (int)basic_cloud_ptr->points.size();
   basic_cloud_ptr->height = 1;
   basic_cloud_ptr->header.frame_id = "map";
-  basic_cloud_ptr->is_dense = true;
+  basic_cloud_ptr->is_dense = false;
 
-//   boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
-//   viewer = simpleVis(basic_cloud_ptr);
-//    while (!viewer->wasStopped ())
-//   {
-//     viewer->spinOnce (100);
-//////   //
-//     boost::this_thread::sleep (boost::posix_time::microseconds (100));
-////   //
-//////       boost::mutex::scoped_lock updateLock(updateModelMutex);
-//////       if(update)
-//////       {
-//////           if(!viewer->updatePointCloud(cloud, "sample cloud"))
-//////             viewer->addPointCloud(cloud, colorHandler, "sample cloud");
-//////           update = false;
-//////       }
-//////       updateLock.unlock();
-//   }
 }

@@ -38,7 +38,7 @@ public:
   bool update;
   // pcl::PointXYZRGB basic_point;
   pcl::PointCloud<pcl::PointXYZRGB>::Ptr basic_cloud_ptr;
-
+//  boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
 private:
   double shutter_speed;
   int mHeight;

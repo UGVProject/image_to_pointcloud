@@ -12,16 +12,23 @@
 #include <pcl/point_types.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <pcl_ros/point_cloud.h>
-#include <sensor_msgs/PointCloud2.h>
-#include <sensor_msgs/Image.h>
+//#include <sensor_msgs/PointCloud2.h>
+//#include <sensor_msgs/Image.h>
 #include "../include/stereosgm.h"
 #include <message_filters/subscriber.h>
 #include <message_filters/time_synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
+#include <pcl/filters/voxel_grid.h>
+
 
 using namespace std;
 using namespace cv;
 using namespace message_filters;
+
+//pcl::visualization::PCLVisualizer viewer ("Map of UGV SLAM");
+//typedef pcl::PointXYZRGB ColorPoint;
+//typedef pcl::PointCloud<pcl::PointXYZRGB> ColorCloud;
+//pcl::VoxelGrid<ColorPoint> voxel;
 
 class ImageGrabber {
 public:
@@ -48,7 +55,7 @@ int main(int argc, char **argv) {
   ImageGrabber igb(&SGM_Matching);
   bool rectify = true;
   igb.scale = 0.5;
-  igb.disp_size = 128;
+  igb.disp_size = 64;
 
   string calibration = ros::package::getPath("image_to_pointcloud") + "/wide_stereo.yaml";
   std::string intrinsic_filename, extrinsic_filename;
@@ -130,6 +137,10 @@ int main(int argc, char **argv) {
 
   }
 
+//    viewer.addPointCloud(SGM_Matching.basic_cloud_ptr, "UGV_SLAM_map");
+
+//    voxel.setLeafSize(0.07f, 0.07f, 0.07f);
+
     message_filters::Subscriber<sensor_msgs::Image> img_sub1(nh, "/wide/left/image_raw", 1 );
 
     message_filters::Subscriber<sensor_msgs::Image> img_sub2(nh, "/wide/right/image_raw", 1 );
@@ -145,16 +156,21 @@ int main(int argc, char **argv) {
 
 
     sync.registerCallback(boost::bind(&ImageGrabber::GrabImage, &igb, _1, _2 ));
+//    boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
+//    viewer = simpleVis(SGM_Matching.basic_cloud_ptr);
 
-  // ros::spin();
-//  ros::Rate loop_rate(30);
+//    viewer.addCoordinateSystem(0.4,"reference", 0);
+//
+//    viewer.setBackgroundColor(1, 1, 1, 0);
+
   while (nh.ok()) {
     if (SGM_Matching.basic_cloud_ptr != NULL) {
       SGM_Matching.basic_cloud_ptr->header.stamp =
       ros::Time::now().toNSec() / 1000ull;
       point_pub.publish(SGM_Matching.basic_cloud_ptr);
     }
-    ros::spinOnce();
+      ros::spinOnce();
+//      viewer.spinOnce();
 //    loop_rate.sleep();
   }
 
@@ -201,4 +217,11 @@ void ImageGrabber::GrabImage(const sensor_msgs::ImageConstPtr &msg1, const senso
         mpMATCHING->StereoMatching(imLeft1, imRight1, Q,
                                    cv_ptr1->header.stamp.toSec());
     }
+
+//    ColorCloud::Ptr tmp_cloud(new ColorCloud());
+//    voxel.setInputCloud( mpMATCHING->basic_cloud_ptr);
+//    voxel.filter ( *tmp_cloud);
+//    mpMATCHING->basic_cloud_ptr = tmp_cloud;
+
+//    viewer.updatePointCloud(mpMATCHING->basic_cloud_ptr, "UGV_SLAM_map");
 }
