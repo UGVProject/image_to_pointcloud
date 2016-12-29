@@ -23,6 +23,8 @@ using namespace std;
 using namespace cv;
 using namespace message_filters;
 
+//pcl::visualization::PCLVisualizer viewer ("Map of UGV SLAM");
+
 class ImageGrabber {
 public:
     ImageGrabber(stereosgm *pMATCHING) : mpMATCHING(pMATCHING) {}
@@ -130,6 +132,8 @@ int main(int argc, char **argv) {
 
     }
 
+//    viewer.addPointCloud(SGM_Matching.basic_cloud_ptr, "UGV_SLAM_map");
+
     message_filters::Subscriber<sensor_msgs::Image> img_sub1(nh, "/wide/left/image_raw", 1 );
 
     message_filters::Subscriber<sensor_msgs::Image> img_sub2(nh, "/wide/right/image_raw", 1 );
@@ -146,6 +150,10 @@ int main(int argc, char **argv) {
 
     sync.registerCallback(boost::bind(&ImageGrabber::GrabImage, &igb, _1, _2 ));
 
+//    viewer.addCoordinateSystem(0.4,"reference", 0);
+//
+//    viewer.setBackgroundColor(1, 1, 1, 0);
+
     // ros::spin();
 //  ros::Rate loop_rate(30);
     while (nh.ok()) {
@@ -155,6 +163,7 @@ int main(int argc, char **argv) {
             point_pub.publish(SGM_Matching.basic_cloud_ptr);
         }
         ros::spinOnce();
+//        viewer.spinOnce();
 //    loop_rate.sleep();
     }
 
@@ -201,4 +210,10 @@ void ImageGrabber::GrabImage(const sensor_msgs::ImageConstPtr &msg1, const senso
         mpMATCHING->StereoMatching(imLeft1, imRight1, Q,
                                    cv_ptr1->header.stamp.toSec());
     }
+    //    ColorCloud::Ptr tmp_cloud(new ColorCloud());
+//    voxel.setInputCloud( mpMATCHING->basic_cloud_ptr);
+//    voxel.filter ( *tmp_cloud);
+//    mpMATCHING->basic_cloud_ptr = tmp_cloud;
+
+//    viewer.updatePointCloud(mpMATCHING->basic_cloud_ptr, "UGV_SLAM_map");
 }

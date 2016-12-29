@@ -208,6 +208,8 @@ void stereosgm::reprojectTo3D(cv::Mat &disparity, cv::Mat &Q,
             pcl::PointXYZRGB basic_point;
 
             basic_point.z = (float)Z * 0.001f;
+            if( (basic_point.z > 40) ||(basic_point.z < 0.5) )
+                continue;
             basic_point.x = (float)X * 0.001f;
             basic_point.y = (float)Y * 0.001f;
             uint32_t rgb = (static_cast<uint32_t>(r) << 16 |
