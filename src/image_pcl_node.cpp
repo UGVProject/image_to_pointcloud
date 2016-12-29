@@ -23,7 +23,7 @@ using namespace std;
 using namespace cv;
 using namespace message_filters;
 
-//pcl::visualization::PCLVisualizer viewer ("Map of UGV SLAM");
+pcl::visualization::PCLVisualizer viewer ("Map of UGV SLAM");
 
 class ImageGrabber {
 public:
@@ -49,8 +49,8 @@ int main(int argc, char **argv) {
 
     ImageGrabber igb(&SGM_Matching);
     bool rectify = true;
-    igb.scale = 0.5;
-    igb.disp_size = 128;
+    igb.scale = 0.25;
+    igb.disp_size = 64;
 
     string calibration = ros::package::getPath("image_to_pointcloud") + "/wide_stereo.yaml";
     std::string intrinsic_filename, extrinsic_filename;
@@ -131,8 +131,13 @@ int main(int argc, char **argv) {
                 Img_size, CV_32F, igb.M1r, igb.M2r);
 
     }
-
-//    viewer.addPointCloud(SGM_Matching.basic_cloud_ptr, "UGV_SLAM_map");
+    pcl::visualization::PointCloudColorHandlerRGBField<pcl::PointXYZRGB> rgb(SGM_Matching.basic_cloud_ptr);
+    viewer.addPointCloud(SGM_Matching.basic_cloud_ptr, "UGV_SLAM_map");
+    viewer.setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "UGV_SLAM_map");
+    viewer.addCoordinateSystem(0.2,"reference", 0);
+    viewer.setBackgroundColor(1, 1, 1, 0);
+    viewer.initCameraParameters();
+    viewer.setCameraPosition(0, 0, 0, 0, 0, 1, 0, -1, 0);
 
     message_filters::Subscriber<sensor_msgs::Image> img_sub1(nh, "/wide/left/image_raw", 1 );
 
@@ -144,26 +149,24 @@ int main(int argc, char **argv) {
 
     sync.setMaxIntervalDuration(ros::Duration(0.04));
     // ros::init(argc, argv, "publish_point_cloud");
-    ros::Publisher point_pub =
-            nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/camera/points", 1);
+//    ros::Publisher point_pub =
+//            nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/camera/points", 1);
 
 
     sync.registerCallback(boost::bind(&ImageGrabber::GrabImage, &igb, _1, _2 ));
 
-//    viewer.addCoordinateSystem(0.4,"reference", 0);
-//
-//    viewer.setBackgroundColor(1, 1, 1, 0);
+
 
     // ros::spin();
 //  ros::Rate loop_rate(30);
     while (nh.ok()) {
-        if (SGM_Matching.basic_cloud_ptr != NULL) {
-            SGM_Matching.basic_cloud_ptr->header.stamp =
-                    ros::Time::now().toNSec() / 1000ull;
-            point_pub.publish(SGM_Matching.basic_cloud_ptr);
-        }
+//        if (SGM_Matching.basic_cloud_ptr != NULL) {
+//            SGM_Matching.basic_cloud_ptr->header.stamp =
+//                    ros::Time::now().toNSec() / 1000ull;
+//            point_pub.publish(SGM_Matching.basic_cloud_ptr);
+//        }
         ros::spinOnce();
-//        viewer.spinOnce();
+        viewer.spinOnce();
 //    loop_rate.sleep();
     }
 
@@ -215,5 +218,5 @@ void ImageGrabber::GrabImage(const sensor_msgs::ImageConstPtr &msg1, const senso
 //    voxel.filter ( *tmp_cloud);
 //    mpMATCHING->basic_cloud_ptr = tmp_cloud;
 
-//    viewer.updatePointCloud(mpMATCHING->basic_cloud_ptr, "UGV_SLAM_map");
+    viewer.updatePointCloud(mpMATCHING->basic_cloud_ptr, "UGV_SLAM_map");
 }

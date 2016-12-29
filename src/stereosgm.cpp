@@ -38,10 +38,11 @@ void stereosgm::StereoMatching(const cv::Mat &imLeft, const cv::Mat &imRight,
     // gettimeofday(&start, NULL);
     ssgm.execute(left.data, right.data, (void **)&output.data);
     // gettimeofday(&end, NULL);
-    for (int r = 10; r < output.rows - 10; r++) {
+    for (int r = 4; r < output.rows - 4; r++) {
         uchar* rgb_data = output.ptr<uchar>(r);
-        for (int c = 10; c < output.cols - 10; c++) {
-            if (rgb_data[c] == 0) {
+        for (int c = 4; c < output.cols - 4; c++) {
+            uint8_t r1 = rgb_data[c];
+            if (0 == r1) {
                 if(rgb_data[c+1] > rgb_data[c-1]){
                     rgb_data[c] = rgb_data[c+1];
                 }
@@ -51,6 +52,7 @@ void stereosgm::StereoMatching(const cv::Mat &imLeft, const cv::Mat &imRight,
             }
         }
     }
+
     reprojectTo3D(output, Q, true);
     // seconds  = end.tv_sec  - start.tv_sec;
     // useconds = end.tv_usec - start.tv_usec;
@@ -71,65 +73,6 @@ void stereosgm::StereoMatching(const cv::Mat &imLeft, const cv::Mat &imRight,
 
 //   visualizer(cloud);
 }
-
-void stereosgm::visualizer(cv::Mat &cloud) {
-    basic_cloud_ptr = pcl::PointCloud<pcl::PointXYZRGB>::Ptr(
-            new pcl::PointCloud<pcl::PointXYZRGB>);
-    uint8_t r;
-    for (int i = 0; i < cloud.rows; i++) {
-        uchar *rgb_ptr = left.ptr<uchar>(i);
-        for (int j = 0; j < cloud.cols; j++) {
-            r = rgb_ptr[j];
-
-            pcl::PointXYZRGB basic_point;
-            cv::Vec3f cloudpoint = cloud.at<cv::Vec3f>(i, j);
-            // if (std::isfinite(cloudpoint[0]) && std::isfinite(cloudpoint[1]) &&
-            //     std::isfinite(cloudpoint[2])) {
-            basic_point.z = cloudpoint[2] * 0.001f;
-            basic_point.x = cloudpoint[0] * 0.001f;
-            basic_point.y = cloudpoint[1] * 0.001f;
-            uint32_t rgb = (static_cast<uint32_t>(r) << 16 |
-                            static_cast<uint32_t>(r) << 8 | static_cast<uint32_t>(r));
-            basic_point.rgb = *reinterpret_cast<float *>(&rgb);
-            basic_cloud_ptr->points.push_back(basic_point);
-            // if ((i < 50) && (i > 20) && (j < 550) && (j > 450)) {
-            //   std::cout << "x: " << basic_point.x << " and y: " << basic_point.y
-            //             << " and z: " << basic_point.z << std::endl;
-            // }
-            // }
-        }
-    }
-
-    // std::cout<<points.size ()<<std::endl;
-    basic_cloud_ptr->width = (int)basic_cloud_ptr->points.size();
-    basic_cloud_ptr->height = 1;
-    basic_cloud_ptr->header.frame_id = "map";
-    basic_cloud_ptr->is_dense = true;
-    // basic_cloud_ptr->
-
-//   boost::shared_ptr<pcl::visualization::PCLVisualizer> viewer;
-//   viewer = simpleVis(basic_cloud_ptr);
-//    viewer->spinOnce (100);
-//    cv::imshow("image", output);
-//    cv::waitKey(1);
-//   //
-//   while (!viewer->wasStopped ())
-//   {
-//     viewer->spinOnce (100);
-//   //
-//     boost::this_thread::sleep (boost::posix_time::microseconds (100));
-//   //
-////       boost::mutex::scoped_lock updateLock(updateModelMutex);
-////       if(update)
-////       {
-////           if(!viewer->updatePointCloud(cloud, "sample cloud"))
-////             viewer->addPointCloud(cloud, colorHandler, "sample cloud");
-////           update = false;
-////       }
-////       updateLock.unlock();
-//   }
-}
-
 
 boost::shared_ptr<pcl::visualization::PCLVisualizer>
 stereosgm::simpleVis(pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr cloud) {
@@ -163,7 +106,7 @@ void stereosgm::reprojectTo3D(cv::Mat &disparity, cv::Mat &Q,
 
     int dtype = CV_32FC3;
 
-    const double bigZ = 10000.;
+    const double bigZ = 1000000.;
     double q[4][4];
     cv::Mat _Q(4, 4, CV_64F, q);
     Q.convertTo(_Q, CV_64F);
