@@ -30,12 +30,13 @@ using namespace std;
 using namespace cv;
 using namespace message_filters;
 
-
+typedef pcl::PointXYZRGB ColorPoint;
+typedef pcl::PointXYZI GrayPoint;
 typedef pcl::PointCloud<pcl::PointXYZRGB> ColorCloud;
 pcl::visualization::PCLVisualizer viewer ("Map of UGV SLAM");
 //float resolution = std::numeric_limits<float>::quiet_NaN();
-
-//pcl::VoxelGrid<ColorPoint> voxel;
+pcl::VoxelGrid<ColorPoint> voxel;
+GrayPoint viewpoint;
 
 class ImageGrabber {
 public:
@@ -152,7 +153,7 @@ int main(int argc, char **argv) {
     viewer.setBackgroundColor(1, 1, 1, 0);
     viewer.initCameraParameters();
     viewer.setCameraPosition(0, 0, 0, 0, 0, 1, 0, -1, 0);
-
+    voxel.setLeafSize(0.01f, 0.01f, 0.01f);
 
     message_filters::Subscriber<sensor_msgs::Image> img_sub1(nh, "/wide/left/image_raw", 10 );
 
@@ -225,6 +226,18 @@ void ImageGrabber::GrabImage(const sensor_msgs::ImageConstPtr &msg1, const senso
                                    cv_ptr1->header.stamp.toSec());
         mpMATCHING->reprojectTo3D(mpMATCHING->output, Q, true, info);
     }
+
+    GrayPoint newpoint;
+    newpoint.x = info->origin.position.x;
+    newpoint.y = info->origin.position.y;
+    newpoint.z = info->origin.position.z;
+    viewer.addLine(viewpoint, newpoint, 0, 0, 1, to_string(info->header.seq));
+    viewpoint = newpoint;
+
+    ColorCloud::Ptr tmp_cloud(new ColorCloud());
+    voxel.setInputCloud( mpMATCHING->final_map );
+    voxel.filter( *tmp_cloud );
+    mpMATCHING->final_map = tmp_cloud;
 
     viewer.updatePointCloud(mpMATCHING->final_map, "UGV_SLAM_map");
 }
