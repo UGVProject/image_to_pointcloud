@@ -9,11 +9,11 @@
   <node name="image_to_pcl_node" pkg="image_to_pointcloud" type="image_to_pcl_node" output="screen">
 
     <param name="rectify" value="$(arg rectify)" />
-    <param name="scale"                 value="0.5" />
+    <param name="scale"                 value="0.25" />
     <param name="calibration" value="$(arg calibration_file_position)" />
     <param name="/map_visualization/resolution" value="0.002" />
     <!--<param name="intrinsic_filename"    value="$(find convert_pcl)/intrinsics.yml" />-->
     <!--<param name="extrinsic_filename"    value="$(find convert_pcl)/extrinsics.yml" />-->
-    <param name="disparity_size"        value="128" />
+    <param name="disparity_size"        value="64" />
   </node>
 </launch>

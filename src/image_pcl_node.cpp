@@ -30,23 +30,18 @@ using namespace std;
 using namespace cv;
 using namespace message_filters;
 
-typedef pcl::PointXYZI GrayPoint;
-typedef pcl::PointXYZRGB ColorPoint;
+
 typedef pcl::PointCloud<pcl::PointXYZRGB> ColorCloud;
 pcl::visualization::PCLVisualizer viewer ("Map of UGV SLAM");
-float resolution = std::numeric_limits<float>::quiet_NaN();
-ColorCloud::Ptr final_map(new ColorCloud());
-pcl::VoxelGrid<ColorPoint> voxel;
+//float resolution = std::numeric_limits<float>::quiet_NaN();
+
+//pcl::VoxelGrid<ColorPoint> voxel;
 
 class ImageGrabber {
 public:
   ImageGrabber(stereosgm *pMATCHING) : mpMATCHING(pMATCHING) {}
 
   void GrabImage(const sensor_msgs::ImageConstPtr &msg1, const sensor_msgs::ImageConstPtr &msg2, const image_to_pointcloud::MapInfoConstPtr& info);
-
-  void MapGen(const Mat & color, const Mat & depth, const image_to_pointcloud::MapInfoConstPtr& info, cv::Mat &Q, float cx, float cy, float fx, float fy);
-
-  void reprojectTo3D(const cv::Mat &disparity, const cv::Mat &color, cv::Mat &Q, ColorCloud::Ptr &cloud , const float resolution, bool handleMissingValues);
 
   stereosgm *mpMATCHING;
 //  std_msgs::Header head;
@@ -56,9 +51,7 @@ public:
 //  int height_up_cut = 140, height_down_cut = 704;
   cv::Mat M1l, M2l, M1r, M2r, Q;
   int disp_size;
-  Util::CPPTimer timer_cloud;
-  GrayPoint viewpoint;
-  float cx,cy,fx,fy;
+
 };
 
 int main(int argc, char **argv) {
@@ -69,15 +62,15 @@ int main(int argc, char **argv) {
 
   ImageGrabber igb(&SGM_Matching);
   bool rectify = true;
-  igb.scale = 0.5;
-  igb.disp_size = 128;
+  igb.scale = 0.25;
+  igb.disp_size = 64;
 
   string calibration = ros::package::getPath("image_to_pointcloud") + "/wide_stereo.yaml";
 
   if (n.getParam("scale", igb.scale))
-    ROS_INFO("Get scale: %d", igb.scale);
+    ROS_INFO("Get scale: %f", igb.scale);
   else
-    ROS_WARN("Using default scale: %d", igb.scale);
+    ROS_WARN("Using default scale: %f", igb.scale);
 
     if(n.getParam("rectify", rectify))
         ROS_INFO("Get rectify flag: %s",rectify? "true":"false");
@@ -93,14 +86,13 @@ int main(int argc, char **argv) {
   else
     ROS_WARN("Using default size: %d", igb.disp_size);
 
-    if(n.getParam("/map_visualization/resolution", resolution))
-    {
-        ROS_WARN("Set fixed visualization resolution parameter: %f", resolution);
-        viewer.addPointCloud(final_map, "ugv_slam_map");
-    }
-    else
-        ROS_WARN("Using dynamic visualization resolution!");
-  // ros::start();
+//    if(n.getParam("/map_visualization/resolution", resolution))
+//    {
+//        ROS_WARN("Set fixed visualization resolution parameter: %f", resolution);
+//        viewer.addPointCloud(final_map, "ugv_slam_map");
+//    }
+//    else
+//        ROS_WARN("Using dynamic visualization resolution!");
 
   if (rectify) {
     igb.do_rectify = true;
@@ -119,11 +111,6 @@ int main(int argc, char **argv) {
       K_l *= igb.scale;
       fsSettings["RIGHT.K"] >> K_r;
       K_r *= igb.scale;
-
-      igb.fx = K_l.at<float>(0,0);
-      igb.fy = K_l.at<float>(1,1);
-      igb.cx = K_l.at<float>(0,2);
-      igb.cy = K_l.at<float>(1,2);
 
       fsSettings["R"] >> R;
       fsSettings["T"] >> T;
@@ -156,8 +143,16 @@ int main(int argc, char **argv) {
       cv::initUndistortRectifyMap(
               K_r, D_r, R_r, P_r.rowRange(0, 3).colRange(0, 3),
               Img_size, CV_32F, igb.M1r, igb.M2r);
-
   }
+
+    pcl::visualization::PointCloudColorHandlerRGBField<pcl::PointXYZRGB> rgb(SGM_Matching.final_map);
+    viewer.addPointCloud(SGM_Matching.final_map, "UGV_SLAM_map");
+    viewer.setPointCloudRenderingProperties (pcl::visualization::PCL_VISUALIZER_POINT_SIZE, 3, "UGV_SLAM_map");
+    viewer.addCoordinateSystem(0.2,"reference", 0);
+    viewer.setBackgroundColor(1, 1, 1, 0);
+    viewer.initCameraParameters();
+    viewer.setCameraPosition(0, 0, 0, 0, 0, 1, 0, -1, 0);
+
 
     message_filters::Subscriber<sensor_msgs::Image> img_sub1(nh, "/wide/left/image_raw", 10 );
 
@@ -173,11 +168,7 @@ int main(int argc, char **argv) {
 
     sync.registerCallback(boost::bind(&ImageGrabber::GrabImage, &igb, _1, _2, _3 ));
 
-    viewer.addCoordinateSystem(0.2, "reference", 0);
-
-    viewer.setBackgroundColor(1, 1, 1, 0);
-
-    voxel.setLeafSize(resolution, resolution, resolution);
+//    voxel.setLeafSize(resolution, resolution, resolution);
   //  ros::Rate loop_rate(30);
     while (nh.ok()) {
 //    if (SGM_Matching.basic_cloud_ptr != NULL) {
@@ -228,138 +219,13 @@ void ImageGrabber::GrabImage(const sensor_msgs::ImageConstPtr &msg1, const senso
               imRightRec, M1r, M2r, cv::INTER_LINEAR);
         mpMATCHING->StereoMatching(imLeftRec, imRightRec, Q,
                                    cv_ptr1->header.stamp.toSec());
-        MapGen(imLeftRec, mpMATCHING->output, info, Q, cx, cy, fx,fy);
-
+        mpMATCHING->reprojectTo3D(mpMATCHING->output, Q, true, info);
     } else {
         mpMATCHING->StereoMatching(imLeft_scale, imRight_scale, Q,
                                    cv_ptr1->header.stamp.toSec());
-        MapGen(imLeft_scale, mpMATCHING->output, info, Q, cx, cy, fx,fy);
+        mpMATCHING->reprojectTo3D(mpMATCHING->output, Q, true, info);
     }
 
-
-
+    viewer.updatePointCloud(mpMATCHING->final_map, "UGV_SLAM_map");
 }
 
-void ImageGrabber::MapGen(const Mat & color, const Mat & depth, const image_to_pointcloud::MapInfoConstPtr& info, cv::Mat &Q, float cx, float cy, float fx, float fy) {
-    timer_cloud.tic();
-    Eigen::Affine3d transform;
-//    float res = info->resolution;
-    GrayPoint newpoint;
-    newpoint.x = info->origin.position.x;
-    newpoint.y = info->origin.position.y;
-    newpoint.z = info->origin.position.z;
-    viewer.addLine(viewpoint, newpoint, 0, 0, 1, to_string(info->header.seq));
-    viewpoint = newpoint;
-
-    tf::poseMsgToEigen (info->origin, transform);
-
-    ColorCloud::Ptr cloud(new ColorCloud());
-//    reprojectTo3D(depth, color, Q, cloud, res, true);
-
-    int height_center = info->height/2;
-    int width_center = info->width/2;
-
-    for(int i = 0; i < info->height; i++)
-        for(int j = 0; j < info->width; j++)
-        {
-            ColorPoint point;
-            point.z = depth.at<float>(i, j) * info->resolution;
-            if((point.z < 0.2) || (point.z > 100))
-                continue;
-            point.y = (i - cx) * point.z / fx ;
-            point.x = (j - cy) * point.z / fy ;
-            point.r = color.at<float>(i, j) * 255;
-            point.g = color.at<float>(i, j) * 255;
-            point.b = color.at<float>(i, j) * 255;
-            cloud->push_back(point);
-        }
-    ColorCloud::Ptr transformed_cloud(new ColorCloud());
-    pcl::transformPointCloud(*cloud, *transformed_cloud, transform);
-
-    if (!isnan(resolution))
-    {
-        *final_map += *transformed_cloud;
-        ColorCloud::Ptr tmp_cloud(new ColorCloud());
-        voxel.setInputCloud( final_map );
-        voxel.filter( *tmp_cloud );
-        final_map = tmp_cloud;
-        viewer.updatePointCloud(final_map, "ugv_map");
-        cout<<"ddd"<<endl;
-    }
-    else
-        viewer.addPointCloud(transformed_cloud, to_string(info->header.seq));
-
-    ROS_INFO("Added refined cloud ID: %d; Using time %.4fs", info->header.seq, timer_cloud.end());
-
-}
-
-void ImageGrabber::reprojectTo3D(const cv::Mat &disparity, const cv::Mat &color, cv::Mat &Q, ColorCloud::Ptr &cloud , const float resolution, bool handleMissingValues) {
-    int stype = disparity.type();
-//    basic_cloud_ptr = pcl::PointCloud<pcl::PointXYZRGB>::Ptr(
-//            new pcl::PointCloud<pcl::PointXYZRGB>);
-    CV_Assert(stype == CV_8UC1 || stype == CV_16SC1 || stype == CV_32SC1 ||
-              stype == CV_32FC1);
-    CV_Assert(Q.size() == cv::Size(4, 4));
-
-    int dtype = CV_32FC3;
-
-    const double bigZ = 10000.;
-    double q[4][4];
-    cv::Mat _Q(4, 4, CV_64F, q);
-    Q.convertTo(_Q, CV_64F);
-
-    int x, cols = disparity.cols;
-    CV_Assert(cols >= 0);
-
-    std::vector<float> _sbuf(cols + 1), _dbuf(cols * 3 + 1);
-    float *sbuf = &_sbuf[0], *dbuf = &_dbuf[0];
-    double minDisparity = FLT_MAX;
-
-    // NOTE: here we quietly assume that at least one pixel in the disparity map
-    // is not defined.
-    // and we set the corresponding Z's to some fixed big value.
-    if (handleMissingValues)
-        cv::minMaxIdx(disparity, &minDisparity, 0, 0, 0);
-
-    for (int y = 0; y < disparity.rows; y++) {
-        float *sptr = sbuf, *dptr = dbuf;
-        const uchar *rgb_ptr = color.ptr<uchar>(y);
-        double qx = q[0][1] * y + q[0][3], qy = q[1][1] * y + q[1][3];
-        double qz = q[2][1] * y + q[2][3], qw = q[3][1] * y + q[3][3];
-
-        if (stype == CV_8UC1) {
-            const uchar *sptr0 = disparity.ptr<uchar>(y);
-            for (x = 0; x < cols; x++)
-                sptr[x] = (float)sptr0[x];
-        } else
-            sptr = (float *)disparity.ptr<float>(y);
-
-        for (x = 0; x < cols;
-             x++, qx += q[0][0], qy += q[1][0], qz += q[2][0], qw += q[3][0]) {
-            uint8_t r = rgb_ptr[x];
-            double d = sptr[x];
-            double iW = 1. / (qw + q[3][2] * d);
-            double X = (qx + q[0][2] * d) * iW;
-            double Y = (qy + q[1][2] * d) * iW;
-            double Z = (qz + q[2][2] * d) * iW;
-            if (fabs(d - minDisparity) <= FLT_EPSILON)
-                Z = bigZ;
-
-            pcl::PointXYZRGB basic_point;
-
-            basic_point.z = (float)Z * resolution;
-//            if(basic_point.z < 10)
-            basic_point.x = (float)X * resolution;
-            basic_point.y = (float)Y * resolution;
-            uint32_t rgb = (static_cast<uint32_t>(r) << 16 |
-                            static_cast<uint32_t>(r) << 8 | static_cast<uint32_t>(r));
-            basic_point.rgb = *reinterpret_cast<float *>(&rgb);
-            cloud->points.push_back(basic_point);
-        }
-    }
-//    // std::cout<<points.size ()<<std::endl;
-//    cloud->width = (int)cloud->points.size();
-//    cloud->height = 1;
-//    cloud->header.frame_id = "map";
-//    cloud->is_dense = true;
-}

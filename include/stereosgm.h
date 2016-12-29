@@ -25,6 +25,11 @@
 #include <pcl_ros/point_cloud.h>
 #include <std_msgs/String.h>
 #include <string>
+#include "../include/timer.h"
+#include <pcl/filters/voxel_grid.h>
+#include <pcl/common/transforms.h>
+#include <pcl/io/ply_io.h>
+#include <image_to_pointcloud/MapInfo.h>
 
 class stereosgm {
 
@@ -35,11 +40,25 @@ public:
 
   void StereoMatching(const cv::Mat &imLeft, const cv::Mat &imRight, cv::Mat Q,
                       const double &timestamp);
-  void visualizer(cv::Mat &cloud);
-  bool update;
+//  void visualizer(cv::Mat &cloud);
+
+  void reprojectTo3D(cv::Mat &, cv::Mat &, bool, const image_to_pointcloud::MapInfoConstPtr& info);
+
+//  void MapGen( const image_to_pointcloud::MapInfoConstPtr& info);
+
   cv::Mat output;
 
-  pcl::PointCloud<pcl::PointXYZRGB>::Ptr basic_cloud_ptr;
+  Util::CPPTimer timer_cloud;
+
+  typedef pcl::PointXYZI GrayPoint;
+
+  typedef pcl::PointXYZRGB ColorPoint;
+
+  typedef pcl::PointCloud<pcl::PointXYZRGB> ColorCloud;
+
+  ColorCloud::Ptr cloud;
+
+  ColorCloud::Ptr final_map;
 
 private:
   int mHeight;
@@ -58,5 +77,4 @@ private:
   boost::shared_ptr<pcl::visualization::PCLVisualizer>
   simpleVis(pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr cloud);
 
-  void reprojectTo3D(cv::Mat &, cv::Mat &, bool);
 };
