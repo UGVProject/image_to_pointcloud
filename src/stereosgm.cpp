@@ -3,6 +3,7 @@
 // Modified by Zhang Handuo on 22/04/16.
 
 #include "../include/stereosgm.h"
+
 stereosgm::stereosgm() : mWidth(640), mHeight(282), disp_size(128) {
     basic_cloud_ptr = ColorCloud::Ptr( new ColorCloud );
 }
@@ -52,8 +53,9 @@ void stereosgm::StereoMatching(const cv::Mat &imLeft, const cv::Mat &imRight,
             }
         }
     }
-
+//    timer.tic();
     reprojectTo3D(output, Q, true);
+//    timer.toc("disparity to pcloud");
     // seconds  = end.tv_sec  - start.tv_sec;
     // useconds = end.tv_usec - start.tv_usec;
     // mtime = ((seconds) * 1000 + useconds/1000.0) + 0.5;
@@ -96,6 +98,7 @@ stereosgm::simpleVis(pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr cloud) {
 }
 void stereosgm::reprojectTo3D(cv::Mat &disparity, cv::Mat &Q,
                               bool handleMissingValues) {
+
     int stype = disparity.type();
 
     ColorCloud::Ptr cloud(new ColorCloud());

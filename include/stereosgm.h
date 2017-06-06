@@ -25,6 +25,7 @@
 #include <pcl_ros/point_cloud.h>
 #include <std_msgs/String.h>
 #include <string>
+#include "../include/lib.h"
 
 class stereosgm {
 
@@ -61,4 +62,5 @@ private:
   simpleVis(pcl::PointCloud<pcl::PointXYZRGB>::ConstPtr cloud);
 
   void reprojectTo3D(cv::Mat &, cv::Mat &, bool);
+  Util::CPPTimer timer;
 };

@@ -53,11 +53,11 @@ int main(int argc, char **argv) {
     igb.disp_size = 64;
 
     string calibration = ros::package::getPath("image_to_pointcloud") + "/wide_stereo.yaml";
-    std::string intrinsic_filename, extrinsic_filename;
-    intrinsic_filename =
-            "/home/zh/catkin_ws/src/image_to_pointcloud/intrinsics.yml";
-    extrinsic_filename =
-            "/home/zh/catkin_ws/src/image_to_pointcloud/extrinsics.yml";
+//    std::string intrinsic_filename, extrinsic_filename;
+//    intrinsic_filename =
+//            "/home/zh/catkin_ws/src/image_to_pointcloud/intrinsics.yml";
+//    extrinsic_filename =
+//            "/home/zh/catkin_ws/src/image_to_pointcloud/extrinsics.yml";
 
     if (n.getParam("scale", igb.scale))
         ROS_INFO("Get scale: %d", igb.scale);
@@ -147,7 +147,7 @@ int main(int argc, char **argv) {
 
     Synchronizer<SyncPolicy> sync(SyncPolicy(50), img_sub1, img_sub2 );
 
-    sync.setMaxIntervalDuration(ros::Duration(0.04));
+    sync.setMaxIntervalDuration(ros::Duration(0.02));
     // ros::init(argc, argv, "publish_point_cloud");
 //    ros::Publisher point_pub =
 //            nh.advertise<pcl::PointCloud<pcl::PointXYZRGB>>("/camera/points", 1);
