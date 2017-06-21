@@ -1,5 +1,5 @@
 <launch>
-  <arg name="dataset" value="4mm_Campus_17:06_loop"/>
+  <arg name="dataset" value="pointcloud"/>
   <node pkg="rosbag" type="play" name="play_bag_node" args="--queue=10 --clock $HOME/$(arg dataset).bag" output="screen"/>
 
   <node name="image_to_pcl_node" pkg="convert_pcl" type="image_to_pcl_node" output="screen">

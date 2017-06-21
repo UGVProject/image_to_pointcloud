@@ -26,7 +26,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include "stereo_matching.hpp"
+#include "stereo_matching.h"
 
 #include <climits>
 #include <cfloat>
